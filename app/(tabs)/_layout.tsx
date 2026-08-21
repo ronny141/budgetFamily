@@ -82,6 +82,23 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="four"
+        options={{
+          title: 'Hogar',
+          tabBarIcon: ({ color }) => (
+            <SymbolView
+              name={{
+                ios: 'chevron.left.forwardslash.chevron.right',
+                android: 'code',
+                web: 'code',
+              }}
+              tintColor={color}
+              size={28}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
