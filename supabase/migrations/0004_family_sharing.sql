@@ -127,6 +127,13 @@ create policy "Users can delete household income"
 
 -- 5. budgets: re-key from user_id to household_id ---------------------------
 
+-- Drop the old user_id-based policies first - they reference the column we're
+-- about to drop, and Postgres won't let a column go while a policy depends on it.
+drop policy if exists "Users can read their own budgets" on public.budgets;
+drop policy if exists "Users can insert their own budgets" on public.budgets;
+drop policy if exists "Users can update their own budgets" on public.budgets;
+drop policy if exists "Users can delete their own budgets" on public.budgets;
+
 alter table public.budgets add column if not exists household_id uuid references public.households (id);
 
 do $$
@@ -159,23 +166,19 @@ alter table public.budgets drop constraint if exists budgets_user_id_category_id
 alter table public.budgets drop column if exists user_id;
 alter table public.budgets add constraint budgets_household_id_category_id_key unique (household_id, category_id);
 
-drop policy if exists "Users can read their own budgets" on public.budgets;
 create policy "Users can read household budgets"
   on public.budgets for select
   using (household_id in (select household_id from public.household_members where user_id = auth.uid()));
 
-drop policy if exists "Users can insert their own budgets" on public.budgets;
 create policy "Users can insert household budgets"
   on public.budgets for insert
   with check (household_id in (select household_id from public.household_members where user_id = auth.uid()));
 
-drop policy if exists "Users can update their own budgets" on public.budgets;
 create policy "Users can update household budgets"
   on public.budgets for update
   using (household_id in (select household_id from public.household_members where user_id = auth.uid()))
   with check (household_id in (select household_id from public.household_members where user_id = auth.uid()));
 
-drop policy if exists "Users can delete their own budgets" on public.budgets;
 create policy "Users can delete household budgets"
   on public.budgets for delete
   using (household_id in (select household_id from public.household_members where user_id = auth.uid()));

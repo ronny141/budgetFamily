@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { getErrorMessage } from '@/lib/errors';
 import {
   createExpense,
   getExpense,
@@ -31,7 +32,7 @@ export default function ExpenseFormModal() {
   useEffect(() => {
     listCategories()
       .then(setCategories)
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+      .catch((err) => setError(getErrorMessage(err)));
   }, []);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function ExpenseFormModal() {
         setDate(expense.expense_date);
         setDescription(expense.description ?? '');
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+      .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setIsLoading(false));
   }, [expenseId]);
 
@@ -64,7 +65,7 @@ export default function ExpenseFormModal() {
       }
       router.back();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

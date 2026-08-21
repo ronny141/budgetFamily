@@ -4,6 +4,7 @@ import { Alert, FlatList, Platform, Pressable, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { listBudgets, type Budget } from '@/lib/budgets';
+import { getErrorMessage } from '@/lib/errors';
 import { getMonthlySpendByCategory, listCategories, type Category } from '@/lib/expenses';
 import { deleteIncome, getMonthlyIncomeTotal, listIncome, type Income } from '@/lib/income';
 
@@ -46,7 +47,7 @@ export default function OverviewScreen() {
         setCategoryRows(rows);
         setIncomeEntries(incomeList);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+      .catch((err) => setError(getErrorMessage(err)));
   }, []);
 
   useFocusEffect(load);
@@ -55,7 +56,7 @@ export default function OverviewScreen() {
     const runDelete = () => {
       deleteIncome(id)
         .then(load)
-        .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+        .catch((err) => setError(getErrorMessage(err)));
     };
 
     if (Platform.OS === 'web') {

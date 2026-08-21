@@ -62,23 +62,33 @@ export async function getOrCreateHouseholdId(): Promise<string> {
   const userId = await getCurrentUserId();
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const { data: household, error } = await supabase
-      .from('households')
-      .insert({ invite_code: generateInviteCode() })
-      .select()
-      .single();
+    const inviteCode = generateInviteCode();
+
+    // No .select() here: PostgREST would try to return the inserted row,
+    // which the "read your own household" policy can't yet permit (the
+    // membership row below doesn't exist yet) - that turns a should-be-fine
+    // insert into a confusing RLS-violation error. Look the id up afterward
+    // instead, through the same RPC used for joining (bypasses that gap).
+    const { error } = await supabase.from('households').insert({ invite_code: inviteCode });
 
     if (error) {
       if (error.code === '23505') continue; // invite_code collision, retry
       throw error;
     }
 
+    const { data: matches, error: findError } = await supabase.rpc('find_household_by_code', {
+      code: inviteCode,
+    });
+    if (findError) throw findError;
+    const created = matches?.[0];
+    if (!created) throw new Error('No se pudo crear el hogar. Intenta de nuevo.');
+
     const { error: memberError } = await supabase
       .from('household_members')
-      .insert({ household_id: household.id, user_id: userId });
+      .insert({ household_id: created.id, user_id: userId });
     if (memberError) throw memberError;
 
-    return household.id;
+    return created.id;
   }
 
   throw new Error('No se pudo crear el hogar. Intenta de nuevo.');

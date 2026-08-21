@@ -5,6 +5,7 @@ import { FlatList, Pressable, StyleSheet, TextInput } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { signOut } from '@/lib/auth';
 import { listBudgets, setBudget, type Budget } from '@/lib/budgets';
+import { getErrorMessage } from '@/lib/errors';
 import { createCategory, listCategories, type Category } from '@/lib/expenses';
 
 export default function CategoriesScreen() {
@@ -30,7 +31,7 @@ export default function CategoriesScreen() {
           return next;
         });
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+      .catch((err) => setError(getErrorMessage(err)));
   }, []);
 
   useFocusEffect(load);
@@ -43,7 +44,7 @@ export default function CategoriesScreen() {
       setNewName('');
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +56,7 @@ export default function CategoriesScreen() {
       await setBudget(categoryId, Number(limitInputs[categoryId]));
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     }
   }
 

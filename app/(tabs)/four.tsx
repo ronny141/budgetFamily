@@ -3,6 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { getErrorMessage } from '@/lib/errors';
 import { getMyHousehold, getOrCreateHouseholdId, joinHousehold, type MyHousehold } from '@/lib/family';
 
 export default function HouseholdScreen() {
@@ -17,7 +18,7 @@ export default function HouseholdScreen() {
     getMyHousehold()
       .then((existing) => (existing ? existing : getOrCreateHouseholdId().then(getMyHousehold)))
       .then(setHousehold)
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+      .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -31,7 +32,7 @@ export default function HouseholdScreen() {
       setJoinCode('');
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     } finally {
       setIsJoining(false);
     }

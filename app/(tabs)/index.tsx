@@ -3,6 +3,7 @@ import { Link, useFocusEffect } from 'expo-router';
 import { Alert, FlatList, Platform, Pressable, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { getErrorMessage } from '@/lib/errors';
 import { deleteExpense, listCategories, listExpenses, type Category, type Expense } from '@/lib/expenses';
 
 export default function ExpensesScreen() {
@@ -16,7 +17,7 @@ export default function ExpensesScreen() {
         setExpenses(expenseRows);
         setCategoryNames(Object.fromEntries(categoryRows.map((c) => [c.id, c.name])));
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+      .catch((err) => setError(getErrorMessage(err)));
   }, []);
 
   useFocusEffect(load);
@@ -25,7 +26,7 @@ export default function ExpensesScreen() {
     const runDelete = () => {
       deleteExpense(id)
         .then(load)
-        .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+        .catch((err) => setError(getErrorMessage(err)));
     };
 
     // Alert.alert has no effect on react-native-web (it silently no-ops),

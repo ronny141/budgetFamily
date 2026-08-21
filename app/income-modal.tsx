@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { getErrorMessage } from '@/lib/errors';
 import { createIncome, getIncome, updateIncome } from '@/lib/income';
 
 function today() {
@@ -34,7 +35,7 @@ export default function IncomeFormModal() {
         setDate(income.income_date);
         setDescription(income.description ?? '');
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+      .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setIsLoading(false));
   }, [incomeId]);
 
@@ -56,7 +57,7 @@ export default function IncomeFormModal() {
       }
       router.back();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

@@ -65,3 +65,9 @@ It always includes the user themselves (via the `union`), so a user with no hous
 ## Open Questions
 
 None — the data model, household-membership function, and re-keying approach are decided above.
+
+## Found during apply
+
+- **"infinite recursion detected in policy for relation household_members"**: the original `household_members` SELECT policy queried `household_members` from inside its own `USING` clause (`... or household_id in (select household_id from household_members where user_id = auth.uid())`), which re-triggers the same policy on itself. Fixed with a `security definer` helper function (`my_household_id(uid)`) that bypasses RLS internally, used by that policy and by `households`'/`budgets`' policies instead of a raw self-referencing subquery.
+- **RLS chicken-and-egg on `households` insert**: `getOrCreateHouseholdId()` originally did `.insert({...}).select().single()`. PostgREST's `return=representation` tries to read the just-inserted row back, but the "read your own household" SELECT policy can't yet see it — the caller isn't a `household_members` row yet at that point — so the read-back fails and surfaces as a confusing "new row violates row-level security policy for table households" error, even though the insert itself was fine. Fixed by inserting without requesting the row back (`return=minimal`), then looking the new household's id up via the existing `find_household_by_code` RPC (which bypasses this gap by design) before creating the membership row.
+- **Every error message in the app showing as "[object Object]"**: all the UI's `catch` blocks used `err instanceof Error ? err.message : String(err)`, but Supabase/Postgrest errors are plain objects, not `Error` instances, so that check always fell through to `String(err)`. Fixed with a shared `getErrorMessage()` helper in `lib/errors.ts` that also unwraps a `.message` property from plain error-shaped objects, applied everywhere that pattern appeared.
