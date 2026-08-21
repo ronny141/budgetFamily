@@ -117,3 +117,26 @@ export async function deleteExpense(id: string): Promise<void> {
   const { error } = await supabase.from('expenses').delete().eq('id', id);
   if (error) throw error;
 }
+
+export function currentMonthRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return { start: fmt(start), end: fmt(end) };
+}
+
+export async function getMonthlySpendByCategory(): Promise<Record<string, number>> {
+  const { start, end } = currentMonthRange();
+  const { data, error } = await supabase
+    .from('expenses')
+    .select('category_id, amount')
+    .gte('expense_date', start)
+    .lte('expense_date', end);
+  if (error) throw error;
+
+  return data.reduce<Record<string, number>>((totals, row) => {
+    totals[row.category_id] = (totals[row.category_id] ?? 0) + row.amount;
+    return totals;
+  }, {});
+}
