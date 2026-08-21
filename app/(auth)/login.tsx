@@ -33,7 +33,10 @@ export default function LoginScreen() {
         style={styles.input}
         placeholder="Correo electrónico"
         autoCapitalize="none"
+        autoCorrect={false}
         keyboardType="email-address"
+        textContentType="username"
+        autoComplete="email"
         value={email}
         onChangeText={setEmail}
       />
@@ -41,6 +44,10 @@ export default function LoginScreen() {
         style={styles.input}
         placeholder="Contraseña"
         secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        textContentType="password"
+        autoComplete="current-password"
         value={password}
         onChangeText={setPassword}
       />

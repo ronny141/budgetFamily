@@ -35,7 +35,13 @@ export function describeAuthError(error: unknown, context: 'signUp' | 'signIn'):
   const lower = message.toLowerCase();
 
   if (context === 'signIn') {
-    return 'Correo o contraseña incorrectos.';
+    if (code === 'invalid_credentials' || lower.includes('invalid login credentials')) {
+      return 'Correo o contraseña incorrectos.';
+    }
+    // Anything else (network failure, misconfiguration, rate limiting, etc.)
+    // is a real problem, not an intentionally-generic security message -
+    // show it as-is so it's actually debuggable.
+    return message || 'Ocurrió un error inesperado. Intenta de nuevo.';
   }
 
   if (code === 'user_already_exists' || lower.includes('already registered') || lower.includes('already exists')) {

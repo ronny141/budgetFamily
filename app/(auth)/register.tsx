@@ -41,7 +41,10 @@ export default function RegisterScreen() {
         style={styles.input}
         placeholder="Correo electrónico"
         autoCapitalize="none"
+        autoCorrect={false}
         keyboardType="email-address"
+        textContentType="username"
+        autoComplete="email"
         value={email}
         onChangeText={setEmail}
       />
@@ -49,6 +52,10 @@ export default function RegisterScreen() {
         style={styles.input}
         placeholder="Contraseña"
         secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        textContentType="newPassword"
+        autoComplete="new-password"
         value={password}
         onChangeText={setPassword}
       />
